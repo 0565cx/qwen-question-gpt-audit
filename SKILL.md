@@ -255,6 +255,22 @@ Write a final Excel file to the user-provided output path. Match the reference q
 
 Set `审核状态` to `通过` for all final rows. Keep `提示词` empty unless the user explicitly wants it retained.
 
+### Bundled script: scripts/write_final_xlsx.py
+
+After GPT has audited items verbatim per `prompts/审题提示词.txt` and kept only the passing ones (肯定无), use this script to write the final Excel. It does NOT audit; it only serializes already-passed items.
+
+Input JSON may be an array `[{...}]`, an object `{"items": [...]}`, or a key/value dict like `{"出题": {...}, "出答案#2": {...}}`. It validates that `题目` and all three answer layers are non-empty, sets `审核状态=通过`, clears `提示词` (unless `--keep-prompt`), and outputs the fixed column order above.
+
+```bash
+# 默认：输入即终稿，全部写出
+python3 scripts/write_final_xlsx.py audited.json -o 最终_GPT审核通过.xlsx
+
+# 只写被标记通过/肯定无的条目
+python3 scripts/write_final_xlsx.py audited.json -o out.xlsx --passed-only
+```
+
+Flags: `-o/--out`, `--sheet`, `--passed-only`, `--keep-prompt`. It aborts (non-zero exit) if any item is missing a required field.
+
 ## Reporting
 
 Final response should include:
