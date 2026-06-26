@@ -62,7 +62,7 @@ disable-model-invocation: true
 
 行内包含：
 
-- `题目` 或 `问题`
+- `题目`
 - `技能分类`
 - `技能`
 - `知识点`
@@ -101,7 +101,7 @@ disable-model-invocation: true
 它会自动识别三种结构：
 
 - `question`：工作簿同时含 `出题` 和 `出答案` 两个 sheet → 用 `出题` 提示词出题，再用 `出答案` 提示词出答案。
-- `answers`：单个含 `题目`/`问题` 的 sheet → 保持题干不变，只重出三层答案（优先用行内 `提示词`，为空时回退到 `--answer-prompt-file`）。
+- `answers`：单个含 `题目` 列的 sheet → 保持题干不变，只重出三层答案（优先用行内 `提示词`，为空时回退到 `--answer-prompt-file`）。
 - `questions`：不含题目列的单 sheet → 按每行的 `提示词` 各出一题。
 
 用法：

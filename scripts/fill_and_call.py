@@ -41,7 +41,7 @@ VAR_TO_COLUMNS: dict[str, list[str]] = {
     "Q": ["题目", "问题"],
 }
 
-QUESTION_COL_CANDIDATES = ["题目", "问题"]
+QUESTION_COL_CANDIDATES = ["题目"]
 PROMPT_COL = "提示词"
 
 OUTPUT_COLUMNS = [

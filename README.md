@@ -93,7 +93,7 @@ python3 scripts/write_final_xlsx.py audited.json -o 最终_GPT审核通过.xlsx
 | 结构 | 触发条件 | 行为 |
 | --- | --- | --- |
 | `question` | 工作簿含 `出题` + `出答案` 两个 sheet | 用 `出题` 提示词出题，再用 `出答案` 提示词出答案 |
-| `answers` | 单 sheet 且含 `题目`/`问题` 列 | 题干不变，只重出三层参考答案 |
+| `answers` | 单 sheet 且含 `题目` 列 | 题干不变，只重出三层参考答案 |
 | `questions` | 单 sheet 且无题目列 | 按每行 `提示词` 各出一题 |
 
 `fill_and_call.py` 默认 `--mode auto` 自动判断，也可显式指定。
