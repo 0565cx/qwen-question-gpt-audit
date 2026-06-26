@@ -78,7 +78,7 @@ Keep the original question text unchanged; regenerate only `参考答案-第一�
 ## Orchestration rules
 
 1. Read Excel locally and inspect sheets/columns first.
-2. Process rows one by one.
+2. Process rows one by one. You may use `scripts/fill_and_call.py` for the fill-variables + qwen-plus call step (it only generates, never audits).
 3. For each row, replace prompt variables before calling qwen-plus.
 4. Send qwen-plus only the current row prompt and variables.
 5. Ask qwen-plus to return strict JSON.
@@ -92,7 +92,42 @@ Keep the original question text unchanged; regenerate only `参考答案-第一�
 
 ## Qwen API call pattern
 
-Use DashScope OpenAI-compatible endpoint:
+You can either write a one-off script per task, or use the bundled general script `scripts/fill_and_call.py` (recommended for the fill-variables + call step).
+
+### Bundled script: scripts/fill_and_call.py
+
+This script only generates (it never audits or marks 通过). It reads the Excel, fills `{{...}}` placeholders verbatim from row fields, calls qwen-plus, and writes a JSON for GPT to audit.
+
+It auto-detects three structures:
+
+- `question`: workbook has both `出题` and `出答案` sheets → generate question from `出题` prompt, then answers from `出答案` prompt.
+- `answers`: single sheet containing `题目`/`问题` → keep question text, regenerate only the three answer layers (per-row `提示词`, falling back to `--answer-prompt-file`).
+- `questions`: single sheet without a question column → generate one question per row from its `提示词`.
+
+Usage:
+
+```bash
+export DASHSCOPE_API_KEY=...   # never hardcode the key
+
+# 出题+出答案（自动识别）
+python3 scripts/fill_and_call.py 需要重新出题.xlsx -o out.json
+
+# 仅重出答案（题干不变）；行内提示词为空时用 fallback 模板
+python3 scripts/fill_and_call.py 重新出答案.xlsx -o out.json \
+  --answer-prompt-file 出答案提示词.txt
+
+# 审核失败迭代：把针对性约束写进文件，按阶段追加
+python3 scripts/fill_and_call.py 需要重新出题.xlsx -o out.json \
+  --extra-q-file q_constraints.txt --extra-a-file a_constraints.txt
+```
+
+Flags: `--mode auto|question|answers|questions`, `--answer-prompt-file`, `--extra-q-file`, `--extra-a-file`, `-o/--out`.
+
+After it writes `out.json`, GPT MUST audit every item verbatim per `prompts/审题提示词.txt`; the script's output is never auto-passed.
+
+### Raw API pattern
+
+If you write your own script, use the DashScope OpenAI-compatible endpoint:
 
 ```python
 import json
