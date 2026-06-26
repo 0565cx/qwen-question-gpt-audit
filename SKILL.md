@@ -12,6 +12,7 @@ Use this skill to regenerate interview questions and/or reference answers from E
 
 - `qwen-plus` only generates content from row-level prompts and variables.
 - The current GPT agent is the orchestrator and auditor.
+- GPT audit MUST follow `prompts/审题提示词.txt` verbatim. Never rewrite, abbreviate, or extend the audit rules.
 - Do not hand an entire workbook to qwen-plus for autonomous processing.
 - Iterate failed items by adding targeted constraints to the qwen prompt, then re-audit.
 - Final output must contain only items that pass GPT audit.
@@ -82,7 +83,7 @@ Keep the original question text unchanged; regenerate only `参考答案-第一�
 4. Send qwen-plus only the current row prompt and variables.
 5. Ask qwen-plus to return strict JSON.
 6. Parse qwen output into structured fields.
-7. GPT audits the generated row using the interview-question audit rubric.
+7. GPT audits the generated row strictly using `prompts/审题提示词.txt` verbatim (see "GPT audit rubric"). Do not rewrite, abbreviate, or extend those rules.
 8. If GPT audit fails:
    - Record specific failure reasons.
    - Add targeted constraints to the qwen prompt for that item only.
@@ -174,27 +175,17 @@ For answer generation:
 
 ## GPT audit rubric
 
-GPT must audit every generated item. Use the active interview-question audit rules when available. At minimum check:
+GPT MUST audit every generated item strictly according to the canonical audit prompt stored at `prompts/审题提示词.txt` in this skill. This file is the single source of truth.
 
-### Question checks
+Hard rules:
 
-- No knowledge or logic errors.
-- Scenario is common for the target role.
-- Aligned with the target knowledge point.
-- Oral-answer friendly: no code, formulas, drawing, proof, derivation, or symbol explanation requirements.
-- One clear question, no chain questions.
-- Does not include industry, recruitment scene, or job title if the prompt forbids them.
-- Not duplicated or highly homogeneous with known retained questions.
+- Use the canonical 审题提示词 verbatim. Do NOT rewrite, paraphrase, abbreviate, summarize, reorder, or extend its rules.
+- Do NOT substitute your own checklist or invent additional pass/fail criteria. The only audit criteria are the ones written in that file.
+- Replace only the `{{岗位名称}}` placeholder with the actual job title before auditing; change nothing else.
+- Apply every rule exactly as written, including the error-type codes (A1–A4, B1–B6, C1–C2), the three-layer answer definitions, the difficulty definitions, and the risk-labeling rule (肯定无 / 疑似无 / 疑似有 / 肯定有，其中除“肯定无”外均需删除).
+- If the file is missing or unreadable, stop and ask the user for it rather than auditing from memory.
 
-### Answer checks
-
-- Three layers are complete and aligned with the question.
-- First layer gives accurate concepts, facts, operating logic, or criteria.
-- Second layer gives practical methods/options with conditions, risks, and recommendation.
-- Third layer includes one frequent anomaly and one complex problem with concrete handling.
-- No factual errors, over-absolute claims, invented universal thresholds, or mismatched role perspective.
-- Avoid code blocks, formulas, heavy English abbreviation, symbols, or non-oral expressions.
-- Safety/compliance scenarios prioritize people, environment, EHS, and isolation before production continuity.
+Before auditing, read `prompts/审题提示词.txt` in full and apply it as-is.
 
 ## Iteration guidance
 
@@ -206,7 +197,7 @@ When an item fails audit, create targeted constraints. Examples:
 - `化学品泄漏必须优先人员撤离、区域隔离、停供泄压、EHS/设施响应，不要以产线连续性优先。`
 - `保留题干重出答案时不得改题干。`
 
-Re-audit after every regeneration. Do not mark as passed based only on local scripts.
+Re-audit after every regeneration using `prompts/审题提示词.txt` verbatim. Local scripts may pre-filter only quantitative issues (length, stray tokens, leaked meta-instructions); they never replace or override the canonical audit prompt. Do not mark as passed based only on local scripts.
 
 ## Final output format
 
